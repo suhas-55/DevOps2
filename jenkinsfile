@@ -1,0 +1,20 @@
+//scripted pipeline
+node {
+	stage('Preparation'){
+		git 'https://github.com/RiteshDevOpsTrainer/may2020.git'
+	}
+	stage('Build') {
+	    def mvnHome =tool 'M2_HOME'
+	    withEnv(["MVN_HOME=$mvnHome"]) {
+          sh '"$MVN_HOME/bin/mvn" clean install compile package'    
+	    }
+	}
+	stage('Deploy') {
+		ansiblePlaybook credentialsId: '53f1e482-913b-400c-bd1b-8bf74a09202a', installation: 'ansible_1', inventory: '/etc/ansible/hosts', playbook: '/usr/local/ansible/may2020.yml'
+	}
+	stage('Notification') {
+		emailext attachLog: true, body: '''Hello,
+		Please find project status''', subject: 'Jenkins Build Pipeline Logs', to: 'suhasmali555555@gmail.com'
+	}
+	
+}
